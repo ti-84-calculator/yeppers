@@ -1,27 +1,6 @@
 import rocketVideo from './boom.mp4';
 import "./style.css";
 
-let auth;
-
-async function setupAuthorization() {
-  const response = await fetch("/.proxy/api/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      code: "your_authorization_code", // Replace this with the actual authorization code you need
-    }),
-  });
-  const { access_token } = await response.json();
-
-  auth = { access_token }; // Simulate authentication object
-
-  if (auth == null) {
-    throw new Error("Authentication failed");
-  }
-}
-
 document.querySelector('#app').innerHTML = 
   `<div class="click-to-start">
     <h1>Click to Start</h1>
