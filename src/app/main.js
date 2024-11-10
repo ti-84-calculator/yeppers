@@ -1,5 +1,4 @@
 import { DiscordSDK } from "@discord/embedded-app-sdk";
-
 import rocketVideo from './boom.mp4';
 import "./style.css";
 
@@ -9,49 +8,55 @@ const discordSdk = new DiscordSDK(import.meta.env.VITE_DISCORD_CLIENT_ID);
 
 setupDiscordSdk().then(() => {
   console.log("Discord SDK is authenticated");
+}).catch(error => {
+  console.error("Error during Discord SDK authentication:", error);
 });
 
 async function setupDiscordSdk() {
-  await discordSdk.ready();
-  console.log("Discord SDK is ready");
+  try {
+    await discordSdk.ready();
+    console.log("Discord SDK is ready");
 
-  const { code } = await discordSdk.commands.authorize({
-    client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
-    response_type: "code",
-    state: "",
-    prompt: "none",
-    scope: [
-      "identify",
-      "guilds",
-      "applications.commands"
-    ],
-  });
+    const { code } = await discordSdk.commands.authorize({
+      client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
+      response_type: "code",
+      state: "",
+      prompt: "none",
+      scope: [
+        "identify",
+        "guilds",
+        "applications.commands"
+      ],
+    });
 
-  const response = await fetch("/.proxy/api/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      code,
-    }),
-  });
-  const { access_token } = await response.json();
+    const response = await fetch("/.proxy/api/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code,
+      }),
+    });
 
-  auth = await discordSdk.commands.authenticate({
-    access_token,
-  });
+    const { access_token } = await response.json();
 
-  if (auth == null) {
-    throw new Error("Authenticate command failed");
+    auth = await discordSdk.commands.authenticate({
+      access_token,
+    });
+
+    if (auth == null) {
+      throw new Error("Authenticate command failed");
+    }
+  } catch (error) {
+    console.error("Error during SDK setup:", error);
   }
 }
 
 document.querySelector('#app').innerHTML = 
-  <div class="click-to-start">
-    <h1>Click to Start</h1>
-  </div>
-;
+  `<div class="click-to-start">
+     <h1>Click to Start</h1>
+   </div>`;
 
 document.querySelector('.click-to-start').addEventListener('click', () => {
   const videoElement = document.createElement('video');
@@ -68,7 +73,7 @@ document.querySelector('.click-to-start').addEventListener('click', () => {
 
 // Add CSS to style the video and message
 const style = document.createElement('style');
-style.textContent = 
+style.textContent = `
   body, html, #app {
     margin: 0;
     padding: 0;
@@ -98,5 +103,5 @@ style.textContent =
     height: 100%;
     object-fit: cover;
   }
-;
+`;
 document.head.appendChild(style);
