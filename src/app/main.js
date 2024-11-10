@@ -1,57 +1,31 @@
-import { DiscordSDK } from "@discord/embedded-app-sdk";
-
 import rocketVideo from './boom.mp4';
 import "./style.css";
 
 let auth;
 
-const discordSdk = new DiscordSDK(import.meta.env.VITE_DISCORD_CLIENT_ID);
-
-setupDiscordSdk().then(() => {
-  console.log("Discord SDK is authenticated");
-});
-
-async function setupDiscordSdk() {
-  await discordSdk.ready();
-  console.log("Discord SDK is ready");
-
-  const { code } = await discordSdk.commands.authorize({
-    client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
-    response_type: "code",
-    state: "",
-    prompt: "none",
-    scope: [
-      "identify",
-      "guilds",
-      "applications.commands"
-    ],
-  });
-
+async function setupAuthorization() {
   const response = await fetch("/.proxy/api/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      code,
+      code: "your_authorization_code", // Replace this with the actual authorization code you need
     }),
   });
   const { access_token } = await response.json();
 
-  auth = await discordSdk.commands.authenticate({
-    access_token,
-  });
+  auth = { access_token }; // Simulate authentication object
 
   if (auth == null) {
-    throw new Error("Authenticate command failed");
+    throw new Error("Authentication failed");
   }
 }
 
 document.querySelector('#app').innerHTML = 
-  <div class="click-to-start">
+  `<div class="click-to-start">
     <h1>Click to Start</h1>
-  </div>
-;
+  </div>`;
 
 document.querySelector('.click-to-start').addEventListener('click', () => {
   const videoElement = document.createElement('video');
@@ -68,7 +42,7 @@ document.querySelector('.click-to-start').addEventListener('click', () => {
 
 // Add CSS to style the video and message
 const style = document.createElement('style');
-style.textContent = 
+style.textContent = `
   body, html, #app {
     margin: 0;
     padding: 0;
@@ -98,5 +72,5 @@ style.textContent =
     height: 100%;
     object-fit: cover;
   }
-;
+`;
 document.head.appendChild(style);
